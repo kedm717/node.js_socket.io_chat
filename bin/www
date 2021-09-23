@@ -1,29 +1,20 @@
 #!/usr/bin/env node
 
-/**
- * Module dependencies.
- */
+const app = require('../app');
+const debug = require('debug')('socket-example:server');
+const http = require('http');
 
-var app = require('../app');
-var debug = require('debug')('chat-nodejs:server');
-var http = require('http');
-
-/**
- * Get port from environment and store in Express.
- */
-
-var port = normalizePort(process.env.PORT || '3001');
+const port = normalizePort(process.env.PORT || '3001');
 app.set('port', port);
 
-/**
- * Create HTTP server.
- */
+const server = http.createServer(app);
+const io = require('socket.io')(server);
 
-var server = http.createServer(app);
-
-/**
- * Listen on provided port, on all network interfaces.
- */
+io.on('connection', (socket) => {
+  socket.on('chat message', (message) => {
+    socket.broadcast.emit('chat message', message);
+  });
+});
 
 server.listen(port);
 server.on('error', onError);
